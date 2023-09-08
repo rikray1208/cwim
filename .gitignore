@@ -4,3 +4,4 @@ out
 *.log*
 .idea
 .idea/workspace.xml
+db.db

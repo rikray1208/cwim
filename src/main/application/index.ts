@@ -1,5 +1,6 @@
 import { app as electronApp, App } from 'electron'
 import { WindowsManger } from './WindowsManger'
+import { initializeDatabase } from '../db/db'
 
 class Application {
   app: App
@@ -22,4 +23,5 @@ export const application = new Application()
 
 application.app.whenReady().then(async () => {
   await application.windowsManager.createMainWindow()
+  initializeDatabase()
 })

@@ -1,8 +1,11 @@
 import TradeOfferManager from 'steam-tradeoffer-manager'
 import SteamCommunity from 'steamcommunity'
 import SteamUser from 'steam-user'
-import { steamInitialization } from '../../utils/helpers/steam'
+import { generate32BitInteger, steamInitialization } from '../../utils/helpers/steam'
 import { Account, SteamHandler } from '../../types/steam'
+import { EAuthTokenPlatformType, LoginSession } from 'steam-session'
+import { generateAuthCode } from '../../utils/helpers/accounts'
+import { accountsDbService } from '../../db/Services/accounts'
 
 export class SteamAccount {
   account: Account
@@ -11,6 +14,9 @@ export class SteamAccount {
   manager: TradeOfferManager
   handlers: SteamHandler[]
 
+  isLogged: boolean
+  shared_secret: string | null
+
   constructor(account: Account) {
     const { client, community, manager } = steamInitialization()
     this.account = account
@@ -18,15 +24,13 @@ export class SteamAccount {
     this.community = community
     this.manager = manager
 
+    this.isLogged = false
+    this.shared_secret = null
     this.handlers = this.bindHandlers()
   }
 
   private bindHandlers() {
     return [
-      {
-        event: 'loggedOn',
-        handler: this.loggedOnHandler.bind(this)
-      },
       {
         event: 'webSession',
         handler: this.webSessionHandler.bind(this)
@@ -36,22 +40,66 @@ export class SteamAccount {
         handler: this.disconnectedHandler.bind(this)
       },
       {
-        event: 'error',
-        handler: this.onErrorHandler.bind(this)
-      },
-      {
         event: 'accountLimitations',
         handler: this.accountLimitationsHandler.bind(this)
       }
     ] as SteamHandler[]
   }
-  private async loggedOnHandler() {
-    console.log('logged on')
+
+  private async webSessionHandler(_: string, cookies: string[]) {
+    console.log(this.client.wallet)
+    await this.manager.setCookies(cookies)
+    this.community.setCookies(cookies)
   }
-  private async webSessionHandler() {}
+
   private async disconnectedHandler() {}
-  private async onErrorHandler(error: Error) {
-    console.log('@error', error)
+
+  private async accountLimitationsHandler(limited: boolean, _: boolean, locked: boolean) {
+    console.log(limited, locked)
   }
-  private async accountLimitationsHandler() {}
+  private subscribeToEvents() {
+    this.handlers.forEach((handler) => {
+      this.client.on(handler.event, handler.handler)
+    })
+  }
+
+  private async logOn() {
+    if (this.account.token)
+      return this.client.logOn({
+        refreshToken: this.account.token,
+        logonID: generate32BitInteger()
+      })
+
+    const session = new LoginSession(EAuthTokenPlatformType.SteamClient)
+    const code = await generateAuthCode(this.account.login)
+
+    await session.startWithCredentials({
+      accountName: this.account.login,
+      password: this.account.password,
+      steamGuardCode: code
+    })
+
+    const token = await new Promise<string>((resolve, reject) => {
+      session.on('authenticated', () => resolve(session.refreshToken))
+      setTimeout(() => reject(new Error('Bad auth')), 60000)
+    })
+
+    session.cancelLoginAttempt()
+    await accountsDbService.setField<'token'>(this.account.id, { name: 'token', value: token })
+
+    this.client.logOn({
+      refreshToken: token,
+      logonID: generate32BitInteger()
+    })
+  }
+
+  public async start() {
+    this.subscribeToEvents()
+    await this.logOn()
+
+    await new Promise((resolve, reject) => {
+      this.client.on('loggedOn', () => resolve(null))
+      this.client.on('error', (error) => reject(error))
+    })
+  }
 }

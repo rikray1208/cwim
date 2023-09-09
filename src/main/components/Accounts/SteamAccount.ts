@@ -4,7 +4,7 @@ import SteamUser from 'steam-user'
 import { generate32BitInteger, steamInitialization } from '../../utils/helpers/steam'
 import { Account, SteamHandler } from '../../types/steam'
 import { EAuthTokenPlatformType, LoginSession } from 'steam-session'
-import { generateAuthCode } from '../../utils/helpers/accounts'
+import { createProxy, generateAuthCode } from '../../utils/helpers/accounts'
 import { accountsDbService } from '../../db/Services/accounts'
 
 export class SteamAccount {
@@ -18,7 +18,9 @@ export class SteamAccount {
   shared_secret: string | null
 
   constructor(account: Account) {
-    const { client, community, manager } = steamInitialization()
+    const options = account.proxy ? createProxy(account.proxy) : {}
+    const { client, community, manager } = steamInitialization(options)
+
     this.account = account
     this.client = client
     this.community = community
@@ -31,6 +33,10 @@ export class SteamAccount {
 
   private bindHandlers() {
     return [
+      {
+        event: 'loggedOn',
+        handler: this.loggedOnHandler.bind(this)
+      },
       {
         event: 'webSession',
         handler: this.webSessionHandler.bind(this)
@@ -46,13 +52,20 @@ export class SteamAccount {
     ] as SteamHandler[]
   }
 
+  private loggedOnHandler() {
+    this.isLogged = true
+  }
+
   private async webSessionHandler(_: string, cookies: string[]) {
     console.log(this.client.wallet)
     await this.manager.setCookies(cookies)
     this.community.setCookies(cookies)
   }
 
-  private async disconnectedHandler() {}
+  private async disconnectedHandler() {
+    this.isLogged = false
+    this.client.relog()
+  }
 
   private async accountLimitationsHandler(limited: boolean, _: boolean, locked: boolean) {
     console.log(limited, locked)
@@ -70,7 +83,8 @@ export class SteamAccount {
         logonID: generate32BitInteger()
       })
 
-    const session = new LoginSession(EAuthTokenPlatformType.SteamClient)
+    const options = this.account.proxy ? createProxy(this.account.proxy) : {}
+    const session = new LoginSession(EAuthTokenPlatformType.SteamClient, options)
     const code = await generateAuthCode(this.account.login)
 
     await session.startWithCredentials({

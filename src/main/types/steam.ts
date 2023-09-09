@@ -10,6 +10,7 @@ export interface Account {
   login: string
   password: string
   token: string
+  proxy: string | null
   status: string
   cb: boolean
   limited: boolean

@@ -27,9 +27,24 @@ export const sqlCreateAccounts = () => {
   `)
 }
 
+const sqlCreateProxy = () => {
+  db.run(`
+       CREATE TABLE IF NOT EXISTS proxy (
+           id INTEGER PRIMARY KEY AUTOINCREMENT,
+           account_id INTEGER,
+           host TEXT NOT NULL,
+           port TEXT NOT NULL,
+           username TEXT NOT NULL,
+           password TEXT NOT NULL,
+           FOREIGN KEY (account_id) REFERENCES accounts(id)
+       );
+  `)
+}
+
 export const initializeDatabase = () => {
   db.serialize(() => {
     sqlCreateAccounts()
+    sqlCreateProxy()
   })
 }
 

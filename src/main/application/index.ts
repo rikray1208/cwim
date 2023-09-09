@@ -29,5 +29,6 @@ application.app.whenReady().then(async () => {
   const accounts = await accountsDbService.getAccounts()
   const manager = new AccountsManager(accounts)
 
+  //await proxyDbService.addProxy(2, {host: '185.199.229.156', port: '7492', username: 'raun1234', password: 'raun1234'})
   await manager.startQueue()
 })

@@ -16,3 +16,15 @@ export const generateAuthCode = async (login: string) => {
   const { shared_secret } = await getMaFileData(login)
   return await getAuthCode(shared_secret)
 }
+
+export const splitProxy = (proxy: string) => {
+  const [host, port, username, password] = proxy.split(':')
+  return { host, port, username, password }
+}
+
+export const createProxy = (proxy: string) => {
+  const { host, port, username, password } = splitProxy(proxy)
+  return {
+    httpProxy: `http://${username}:${password}@${host}:${port}`
+  }
+}

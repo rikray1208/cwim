@@ -3,9 +3,14 @@ import { Account } from '../../types/steam'
 
 const getAccounts = async (): Promise<Account[]> => {
   return new Promise((resolve) => {
-    db.all('SELECT * from accounts', (_, data: Account[]) => {
-      resolve(data)
-    })
+    db.all(
+      `SELECT accounts.*,
+            proxy.host || ':' || proxy.port || ':' || proxy.username|| ':' || proxy.password AS proxy
+            FROM accounts LEFT JOIN proxy ON accounts.id = proxy.account_id;`,
+      (_, data: Account[]) => {
+        resolve(data)
+      }
+    )
   })
 }
 

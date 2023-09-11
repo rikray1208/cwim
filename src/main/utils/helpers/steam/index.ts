@@ -19,13 +19,13 @@ export const generate32BitInteger = () => {
   return Math.floor(Math.random() * 4294967296)
 }
 
-export const getAuthCode = async (shared_secret: string): Promise<string> => {
-  return await new Promise((resolve, reject) => {
-    SteamTotp.getAuthCode(shared_secret, (err, code: string) => {
+export const getTimeOffset = () => {
+  return new Promise<number>((resolve, reject) => {
+    SteamTotp.getTimeOffset((err, offset: number) => {
       if (err) {
         reject(err)
       } else {
-        resolve(code)
+        resolve(offset)
       }
     })
   })

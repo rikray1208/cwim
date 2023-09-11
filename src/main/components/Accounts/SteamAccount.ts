@@ -1,11 +1,13 @@
 import TradeOfferManager from 'steam-tradeoffer-manager'
 import SteamCommunity from 'steamcommunity'
 import SteamUser from 'steam-user'
+import SteamTotp from 'steam-totp'
 import { generate32BitInteger, steamInitialization } from '../../utils/helpers/steam'
 import { Account, SteamHandler } from '../../types/steam'
 import { EAuthTokenPlatformType, LoginSession } from 'steam-session'
-import { createProxy, generateAuthCode } from '../../utils/helpers/accounts'
+import { createProxy, getMaFileData } from '../../utils/helpers/accounts'
 import { accountsDbService } from '../../db/Services/accounts'
+import { AUTH_MACHINE_EVENT, AuthMachine } from '../AuthMachine'
 
 export class SteamAccount {
   account: Account
@@ -13,11 +15,12 @@ export class SteamAccount {
   community: SteamCommunity
   manager: TradeOfferManager
   handlers: SteamHandler[]
+  authMachine: AuthMachine
 
   isLogged: boolean
   shared_secret: string | null
 
-  constructor(account: Account) {
+  constructor(account: Account, authMachine: AuthMachine) {
     const options = account.proxy ? createProxy(account.proxy) : {}
     const { client, community, manager } = steamInitialization(options)
 
@@ -29,6 +32,9 @@ export class SteamAccount {
     this.isLogged = false
     this.shared_secret = null
     this.handlers = this.bindHandlers()
+    this.authMachine = authMachine
+
+    this.authMachine.on(AUTH_MACHINE_EVENT, this.onAuthMachine.bind(this))
   }
 
   private bindHandlers() {
@@ -48,32 +54,48 @@ export class SteamAccount {
       {
         event: 'accountLimitations',
         handler: this.accountLimitationsHandler.bind(this)
+      },
+      {
+        event: 'wallet',
+        handler: this.walletHandler.bind(this)
       }
     ] as SteamHandler[]
+  }
+
+  private subscribeToEvents() {
+    this.handlers.forEach((handler) => {
+      this.client.on(handler.event, handler.handler)
+    })
+  }
+
+  private walletHandler(hasWallet: boolean, currency: number, balance: number) {
+    //получение баланса
+    console.log('@hasWallet', hasWallet)
+    console.log('@currency', currency)
+    console.log('@balance', balance)
+  }
+
+  private async accountLimitationsHandler(limited: boolean, _: boolean, locked: boolean) {
+    //получение лимито
+    console.log(limited, locked)
   }
 
   private loggedOnHandler() {
     this.isLogged = true
   }
 
-  private async webSessionHandler(_: string, cookies: string[]) {
-    console.log(this.client.wallet)
-    await this.manager.setCookies(cookies)
-    this.community.setCookies(cookies)
-  }
-
   private async disconnectedHandler() {
     this.isLogged = false
     this.client.relog()
   }
-
-  private async accountLimitationsHandler(limited: boolean, _: boolean, locked: boolean) {
-    console.log(limited, locked)
+  private async webSessionHandler(_: string, cookies: string[]) {
+    await this.manager.setCookies(cookies)
+    this.community.setCookies(cookies)
   }
-  private subscribeToEvents() {
-    this.handlers.forEach((handler) => {
-      this.client.on(handler.event, handler.handler)
-    })
+
+  private async generateAuthCode() {
+    const { shared_secret } = await getMaFileData(this.account.login)
+    return await SteamTotp.getAuthCode(shared_secret)
   }
 
   private async logOn() {
@@ -85,7 +107,7 @@ export class SteamAccount {
 
     const options = this.account.proxy ? createProxy(this.account.proxy) : {}
     const session = new LoginSession(EAuthTokenPlatformType.SteamClient, options)
-    const code = await generateAuthCode(this.account.login)
+    const code = await this.generateAuthCode()
 
     await session.startWithCredentials({
       accountName: this.account.login,
@@ -115,5 +137,10 @@ export class SteamAccount {
       this.client.on('loggedOn', () => resolve(null))
       this.client.on('error', (error) => reject(error))
     })
+  }
+
+  private async onAuthMachine() {
+    const code = await this.generateAuthCode()
+    console.log('@code', code)
   }
 }

@@ -1,14 +1,15 @@
 import { SteamAccount } from './SteamAccount'
 import { Account } from '../../types/steam'
 import { delay } from '../../utils'
+import { AuthMachine } from '../AuthMachine'
 
 export class AccountsManager {
   accounts: SteamAccount[]
   queue: SteamAccount[]
   isQueueStarted: boolean
 
-  constructor(accounts: Account[]) {
-    const steamAccounts = accounts.map((account) => new SteamAccount(account))
+  constructor(accounts: Account[], authMachine: AuthMachine) {
+    const steamAccounts = accounts.map((account) => new SteamAccount(account, authMachine))
     this.accounts = [...steamAccounts]
     this.queue = [...steamAccounts]
     this.isQueueStarted = false
@@ -41,6 +42,7 @@ export class AccountsManager {
 
     for (const account of this.queue) {
       await account.start()
+
       await delay(10000)
     }
 

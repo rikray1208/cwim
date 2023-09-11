@@ -1,4 +1,10 @@
-export type SteamEvent = 'webSession' | 'loggedOn' | 'disconnected' | 'error' | 'accountLimitations'
+export type SteamEvent =
+  | 'webSession'
+  | 'loggedOn'
+  | 'disconnected'
+  | 'error'
+  | 'accountLimitations'
+  | 'wallet'
 
 export interface SteamHandler {
   event: SteamEvent

@@ -15,11 +15,11 @@ export interface Account {
   id: number
   login: string
   password: string
-  token: string
+  token: string | null
   proxy: string | null
   status: string
-  cb: boolean
-  limited: boolean
+  cb: 0 | 1
+  limited: 0 | 1
   lvl: number
   balance: number
 }

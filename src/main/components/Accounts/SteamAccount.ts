@@ -121,7 +121,7 @@ export class SteamAccount {
     })
 
     session.cancelLoginAttempt()
-    await accountsDbService.setField<'token'>(this.account.id, { name: 'token', value: token })
+    accountsDbService.updateAccount<'token'>(this.account.id, { name: 'token', value: token })
 
     this.client.logOn({
       refreshToken: token,

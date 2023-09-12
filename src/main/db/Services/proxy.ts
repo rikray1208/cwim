@@ -1,22 +1,19 @@
-import { db } from '../db'
-import { Proxy } from '../../types/global'
+import Database from 'better-sqlite3'
+import { dbAppPath } from '../db'
+import { AddProxy } from '../../types/db'
 
-const addProxy = (account_id: number, proxy: Proxy) => {
-  return new Promise((resolve, reject) => {
-    db.serialize(() => {
-      db.run(
-        `
+const db = new Database(dbAppPath)
+
+const addProxy = (addProxyObj: AddProxy) => {
+  try {
+    const insertProxy = db.prepare<AddProxy>(`
           INSERT INTO proxy (account_id, host, port, username, password)
-          VALUES (?, ?, ?, ?, ?);
-      `,
-        [account_id, proxy.host, proxy.port, proxy.username, proxy.password],
-        (err) => {
-          if (err) reject(err)
-          resolve(null)
-        }
-      )
-    })
-  })
+          VALUES (@account_id, @host, @port, @username, @password);
+    `)
+    insertProxy.run(addProxyObj)
+  } catch (e) {
+    console.log('@add proxy error', e)
+  }
 }
 
 export const proxyDbService = {

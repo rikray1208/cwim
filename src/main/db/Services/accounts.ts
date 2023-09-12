@@ -1,103 +1,76 @@
-import { db, sqlCreateAccounts } from '../db'
+import { dbAppPath, sqlCreateAccounts } from '../db'
 import { Account } from '../../types/steam'
+import Database from 'better-sqlite3'
+import { DbAccount } from '../../types/db'
 
-const getAccounts = async (): Promise<Account[]> => {
-  return new Promise((resolve) => {
-    db.all(
-      `SELECT accounts.*,
+const db = new Database(dbAppPath)
+
+const getAccounts = (): Account[] => {
+  const selectAccounts = db.prepare(
+    `SELECT accounts.*,
             proxy.host || ':' || proxy.port || ':' || proxy.username|| ':' || proxy.password AS proxy
-            FROM accounts LEFT JOIN proxy ON accounts.id = proxy.account_id;`,
-      (_, data: Account[]) => {
-        resolve(data)
-      }
-    )
-  })
+            FROM accounts LEFT JOIN proxy ON accounts.id = proxy.account_id;`
+  )
+  return selectAccounts.all() as Account[]
 }
 
-const addAccounts = (accounts: Account[]) => {
-  const batchSize = 999
-  const batches: Account[][] = []
+const addAccounts = (accounts: DbAccount[]) => {
+  try {
+    const insertAccount = db.prepare<DbAccount>(`
+        INSERT INTO accounts (login, password, token, status, cb, limited, lvl, balance)
+        VALUES (@login, @password, @token, @status, @cb, @limited, @lvl, @balance);
+   `)
 
-  for (let i = 0; i < accounts.length; i += batchSize) {
-    const batchAccounts: Account[] = accounts.slice(i, i + batchSize)
-    batches.push(batchAccounts)
-  }
-
-  return Promise.all<null>(
-    batches.map((batch) => {
-      return new Promise((resolve, reject) => {
-        db.serialize(() => {
-          const stmt = db.prepare(
-            'INSERT INTO accounts (login, password, token, status, cb, limited, lvl, balance) VALUES (?, ?, ?, ?, ?, ?, ?, ?);'
-          )
-          batch.forEach((account) => {
-            stmt.run(
-              account.login,
-              account.password,
-              account.token,
-              account.status,
-              account.limited,
-              account.lvl,
-              account.balance
-            )
-          })
-          stmt.finalize((err) => {
-            if (err) reject(err)
-            resolve(null)
-          })
-        })
-      })
+    const insertAccounts = db.transaction((accounts: DbAccount[]) => {
+      for (const account of accounts) insertAccount.run(account)
     })
-  )
+
+    insertAccounts(accounts)
+  } catch (e) {
+    console.log('@add accs error', e)
+  }
 }
 
 const deleteAccounts = (ids: number[]) => {
-  return new Promise<null>((resolve) => {
-    db.serialize(() => {
-      const batchSize = 999
-      const batches: { sql: string; ids: number[] }[] = []
+  try {
+    const deleteAccount = db.prepare<number>(`DELETE FROM accounts WHERE id = ?`)
+    const deleteAccounts = db.transaction((ids: number[]) => {
+      for (const id of ids) deleteAccount.run(id)
+    })
 
-      for (let i = 0; i < ids.length; i += batchSize) {
-        const batchIds: number[] = ids.slice(i, i + batchSize)
-        const placeholders = batchIds.map(() => '?').join(',')
-        const sql = `DELETE FROM accounts WHERE id IN (${placeholders})`
-        batches.push({ sql, ids: batchIds })
-      }
+    deleteAccounts(ids)
 
-      batches.forEach((batch) => {
-        const { sql, ids } = batch
-        db.run(sql, ids)
-      })
-
-      db.run(`CREATE TEMPORARY TABLE accounts_temp AS SELECT * FROM accounts`)
-      db.run('DROP TABLE accounts;')
-      sqlCreateAccounts()
-      db.run(`
+    db.prepare(`CREATE TEMPORARY TABLE accounts_temp AS SELECT * FROM accounts`).run()
+    db.prepare('DROP TABLE accounts;').run()
+    sqlCreateAccounts()
+    db.prepare(
+      `
             INSERT INTO accounts
             (login, password, token, status, cb, limited, lvl, balance)
             SELECT login, password, token, status, cb, limited, lvl, balance FROM accounts_temp;
-      `)
-      db.run('DROP TABLE accounts_temp;')
-
-      resolve(null)
-    })
-  })
+      `
+    ).run()
+    db.prepare('DROP TABLE accounts_temp;').run()
+  } catch (e) {
+    console.log('@deleteAccounts error', e)
+  }
 }
 
-const setField = <T extends keyof Account>(id: number, field: { name: T; value: Account[T] }) => {
-  return new Promise<null>((resolve, reject) => {
-    db.serialize(() => {
-      db.run(`UPDATE accounts SET ${field.name} = ? WHERE id = ?;`, [field.value, id], (err) => {
-        if (err) reject(err)
-        resolve(null)
-      })
-    })
-  })
+const updateAccount = <T extends keyof Account>(
+  id: number,
+  field: { name: T; value: Account[T] }
+) => {
+  try {
+    const updateAccount = db.prepare(`UPDATE accounts SET ${field.name} = ? WHERE id = ?;`)
+    updateAccount.run(field.value, id)
+  } catch (e) {
+    console.log('@setFild error', e)
+  }
 }
 
 export const accountsDbService = {
   addAccounts,
   getAccounts,
   deleteAccounts,
-  setField
+  updateAccount
 }

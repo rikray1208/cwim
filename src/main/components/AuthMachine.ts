@@ -10,14 +10,13 @@ export class AuthMachine extends EventEmitter {
     this.timeOffset = timeOffset
   }
 
-  public async start() {
+  public start() {
     const now = new Date()
     const seconds = now.getSeconds()
-    //const timeDelay = seconds < 30 ? (30 + offset) * 1000 : ((60 + offset)  - seconds) * 1000;
-    const timeDelay = seconds < 30 ? 30 * 1000 : (60 - seconds) * 1000
+    const timeDelay = seconds < 30 ? (30 - seconds) * 1000 : (60 - seconds) * 1000
 
     setTimeout(() => {
-      this.emit('auth')
+      this.emit(AUTH_MACHINE_EVENT)
       setInterval(() => this.emit(AUTH_MACHINE_EVENT), 30000)
     }, timeDelay)
   }

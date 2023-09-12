@@ -28,7 +28,7 @@ application.app.whenReady().then(async () => {
   initializeDatabase()
 
   const authMachine = new AuthMachine(1)
-  await authMachine.start()
+  authMachine.start()
 
   const accounts = await accountsDbService.getAccounts()
   const manager = new AccountsManager(accounts, authMachine)

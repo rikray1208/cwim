@@ -141,6 +141,6 @@ export class SteamAccount {
 
   private async onAuthMachine() {
     const code = await this.generateAuthCode()
-    console.log('@code', code)
+    console.log('@code .', code)
   }
 }

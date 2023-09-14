@@ -23,3 +23,5 @@ export interface Account {
   lvl: number
   balance: number
 }
+
+export type SteamInventory = { appid: string; contextid: string }

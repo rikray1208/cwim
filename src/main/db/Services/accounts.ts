@@ -1,7 +1,8 @@
-import { dbAppPath, sqlCreateAccounts } from '../db'
+import { dbAppPath } from '../db'
 import { Account } from '../../types/steam'
 import Database from 'better-sqlite3'
 import { DbAccount } from '../../types/db'
+import { dbManager } from '../../application'
 
 const db = new Database(dbAppPath)
 
@@ -42,7 +43,7 @@ const deleteAccounts = (ids: number[]) => {
 
     db.prepare(`CREATE TEMPORARY TABLE accounts_temp AS SELECT * FROM accounts`).run()
     db.prepare('DROP TABLE accounts;').run()
-    sqlCreateAccounts()
+    dbManager.createAccounts()
     db.prepare(
       `
             INSERT INTO accounts
@@ -64,7 +65,7 @@ const updateAccount = <T extends keyof Account>(
     const updateAccount = db.prepare(`UPDATE accounts SET ${field.name} = ? WHERE id = ?;`)
     updateAccount.run(field.value, id)
   } catch (e) {
-    console.log('@setFild error', e)
+    console.log('@update account error', e)
   }
 }
 

@@ -43,7 +43,7 @@ export class AccountsManager {
     for (const account of this.queue) {
       await account.start()
 
-      await delay(10000)
+      await delay(300)
     }
 
     this.isQueueStarted = false

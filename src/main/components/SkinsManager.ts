@@ -1,5 +1,7 @@
 import { SteamAccount } from './Accounts/SteamAccount'
-import { SteamInventory } from '../types/steam'
+import { EconItem, SteamInventory } from '../types/steam'
+import { delay } from '../utils'
+import { saveEconItemsToDb } from '../utils/helpers/steam'
 
 export class SkinsManager {
   accounts: SteamAccount[]
@@ -8,34 +10,51 @@ export class SkinsManager {
     this.accounts = accounts
   }
 
-  private async getAccountInventories(account: SteamAccount) {
-    if (!account.client.steamID) return
-
+  private async getAccountInventoriesContext(account: SteamAccount) {
     return await new Promise<SteamInventory[]>((resolve, reject) => {
       const appids: SteamInventory[] = []
       // @ts-ignore | bad type in scm
       account.community.getUserInventoryContexts(account.client.steamID!, (err, apps: object) => {
         if (err) reject(err)
         for (const app of Object.entries(apps)) {
-          appids.push({ appid: app[0], contextid: Object.keys(app[1].rgContexts)[0] }) // can potentially cause errors
+          appids.push({
+            appid: Number(app[0]),
+            contextid: Number(Object.keys(app[1].rgContexts)[0])
+          }) // can potentially cause errors
         }
         resolve(appids)
       })
     })
   }
 
-  public async parseSkins() {
-    const account = this.accounts[1]
-    console.log('@inventories', await this.getAccountInventories(account))
+  public async getAccountInventory(account: SteamAccount, appid: number, contextid: number) {
+    return await new Promise<EconItem[]>((resolve, reject) => {
+      account.manager.getInventoryContents(
+        appid,
+        contextid,
+        false,
+        (err: Error, inventory: EconItem[]) => {
+          if (err) reject(err)
 
-    const invent = await new Promise((resolve, reject) => {
-      account.manager.getInventoryContents(730, 2, false, (err: Error, inventory) => {
-        if (err) reject(err)
-
-        resolve(inventory)
-      })
+          resolve(inventory)
+        }
+      )
     })
+  }
 
-    console.log(JSON.stringify(invent))
+  public async parseSkins() {
+    try {
+      for (const account of this.accounts) {
+        const inventoriesCtx = await this.getAccountInventoriesContext(account)
+
+        for (const { appid, contextid } of inventoriesCtx) {
+          const items = await this.getAccountInventory(account, appid, contextid)
+          saveEconItemsToDb(account.account.id, items)
+          await delay(250)
+        }
+      }
+    } catch (e) {
+      console.log('@parse error', e)
+    }
   }
 }

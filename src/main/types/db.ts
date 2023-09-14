@@ -8,6 +8,7 @@ export interface DbProxy extends Proxy {
 }
 
 export interface DbItem {
+  account_id: number
   icon_url: string
   name: string
   hashName: string

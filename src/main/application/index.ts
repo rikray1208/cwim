@@ -28,6 +28,7 @@ export const dbManager = new DbManager()
 application.app.whenReady().then(async () => {
   await application.windowsManager.createMainWindow()
   dbManager.initializeDatabase()
+
   const authMachine = new AuthMachine(1)
   authMachine.start()
 
@@ -35,7 +36,6 @@ application.app.whenReady().then(async () => {
   const manager = new AccountsManager(accounts, authMachine)
   const skinsManager = new SkinsManager(manager.accounts)
 
-  //proxyDbService.addProxy({account_id: 3, host: '185.199.229.156', port: '7492', username: 'raun1234', password: 'raun1234'})
   await manager.startQueue()
   await skinsManager.parseSkins()
 })

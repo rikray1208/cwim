@@ -6,8 +6,8 @@ const db = new Database(dbAppPath)
 const insertItems = (items: DbItem[]) => {
   try {
     const insertItem = db.prepare<DbItem>(`
-        INSERT INTO item(icon_url, name, hashName, appid, tradable, marketable)
-        VALUES(@icon_url, @name, @hashName, @appid, @tradable, @marketable);
+        INSERT INTO item(account_id, icon_url, name, hashName, appid, tradable, marketable)
+        VALUES(@account_id, @icon_url, @name, @hashName, @appid, @tradable, @marketable);
     `)
 
     const insertItems = db.transaction((items: DbItem[]) => {
@@ -22,11 +22,18 @@ const insertItems = (items: DbItem[]) => {
 
 const insertPrice = (itemPrice: DbItemPrice) => {
   const insertItemPrice = db.prepare<DbItemPrice>(`
-      INSERT INTO item_price(name, price)
-      VALUES(@name, @price);
+      INSERT OR IGNORE INTO item_price(hashName, price)
+      VALUES(@hashName, @price);
   `)
 
   insertItemPrice.run(itemPrice)
+}
+
+const insertItemsPrice = (itemsPrice: DbItemPrice[]) => {
+  const insertItemsPrice = db.transaction((items: DbItemPrice[]) => {
+    for (const item of items) insertPrice(item)
+  })
+  insertItemsPrice(itemsPrice)
 }
 
 const updateItem = <T extends keyof DbItem>(id: number, field: { name: T; value: DbItem[T] }) => {
@@ -40,6 +47,7 @@ const updateItem = <T extends keyof DbItem>(id: number, field: { name: T; value:
 
 export const itemDbService = {
   insertItems,
+  insertItemsPrice,
   insertPrice,
   updateItem
 }

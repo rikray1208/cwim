@@ -46,7 +46,7 @@ export class DbManager {
   private createItemPrice() {
     const createItemPrice = this.db.prepare(`
        CREATE TABLE IF NOT EXISTS item_price(
-            name TEXT PRIMARY KEY,
+            hashName TEXT PRIMARY KEY,
             price REAL
        )
     `)
@@ -64,7 +64,7 @@ export class DbManager {
             appid INTEGER,
             tradable INTEGER,
             marketable INTEGER,
-            FOREIGN KEY (hashName) REFERENCES item_price(name)
+            FOREIGN KEY (hashName) REFERENCES item_price(hashName)
         );
     `)
     createItem.run()

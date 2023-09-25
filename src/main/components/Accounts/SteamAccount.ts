@@ -6,7 +6,6 @@ import { generate32BitInteger, steamInitialization } from '../../utils/helpers/s
 import { Account, SteamHandler } from '../../types/steam'
 import { EAuthTokenPlatformType, LoginSession } from 'steam-session'
 import { createProxy, getMaFileData } from '../../utils/helpers/accounts'
-import { accountsDbService } from '../../db/Services/accounts'
 import { AUTH_MACHINE_EVENT, AuthMachine } from '../AuthMachine'
 
 export class SteamAccount {
@@ -121,7 +120,7 @@ export class SteamAccount {
     })
 
     session.cancelLoginAttempt()
-    accountsDbService.updateAccount<'token'>(this.account.id, { name: 'token', value: token })
+    //accountsDbService.updateAccount<'token'>(this.account.id, { name: 'token', value: token }) | добавить update для orm
 
     this.client.logOn({
       refreshToken: token,

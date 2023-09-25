@@ -3,8 +3,8 @@ import SteamCommunity from 'steamcommunity'
 import TradeOfferManager from 'steam-tradeoffer-manager'
 import SteamTotp from 'steam-totp'
 import { EconItem } from '../../../types/steam'
-import { DbItem, DbItemPrice } from '../../../types/db'
-import { itemDbService } from '../../../db/Services/item'
+import { ItemPriceService } from '../../../db/Services/ItemPrice'
+import { ItemService } from '../../../db/Services/Item'
 
 export const steamInitialization = (options?: object) => {
   const client = new SteamUser(options || {})
@@ -35,7 +35,8 @@ export const getTimeOffset = () => {
 }
 
 export const saveEconItemsToDb = (accountId: number, econItems: EconItem[]) => {
-  const dbItems = econItems.map<DbItem>((item) => ({
+  const dbItems = econItems.map((item) => ({
+    id: 0,
     account_id: accountId,
     name: item.name,
     hashName: item.market_hash_name,
@@ -44,8 +45,8 @@ export const saveEconItemsToDb = (accountId: number, econItems: EconItem[]) => {
     marketable: item.marketable ? 1 : 0,
     tradable: item.tradable ? 1 : 0
   }))
-  const dbItemsPrice = dbItems.map<DbItemPrice>((item) => ({ price: 0, hashName: item.hashName }))
+  const dbItemsPrice = dbItems.map((item) => ({ price: 0, hashName: item.hashName }))
 
-  itemDbService.insertItemsPrice(dbItemsPrice)
-  itemDbService.insertItems(dbItems)
+  ItemPriceService.bulkAdd(dbItemsPrice, true)
+  ItemService.bulkAdd(dbItems)
 }

@@ -1,10 +1,10 @@
 import { app as electronApp, App } from 'electron'
 import { WindowsManger } from './WindowsManger'
-import { accountsDbService } from '../db/Services/accounts'
+import { dbContext } from '../db/DbContext'
 import { AuthMachine } from '../components/AuthMachine'
+import { AccountService } from '../db/Services/Account'
 import { AccountsManager } from '../components/Accounts/AccountsManager'
 import { SkinsManager } from '../components/SkinsManager'
-import { DbManager } from '../db/db'
 
 class Application {
   app: App
@@ -12,30 +12,29 @@ class Application {
   constructor() {
     this.app = electronApp
     this.windowsManager = new WindowsManger()
-
-    this.app.on('window-all-closed', () => {
-      if (process.platform !== 'darwin') {
-        electronApp.quit()
-        process.exit(1)
-      }
-    })
   }
 }
-
 export const application = new Application()
-export const dbManager = new DbManager()
+application.app.on('window-all-closed', () => {
+  electronApp.quit()
+  process.exit(1)
+})
 
 application.app.whenReady().then(async () => {
-  await application.windowsManager.createMainWindow()
-  dbManager.initializeDatabase()
+  try {
+    await application.windowsManager.createMainWindow()
+    dbContext.init()
 
-  const authMachine = new AuthMachine(1)
-  authMachine.start()
+    const authMachine = new AuthMachine(1)
+    authMachine.start()
 
-  const accounts = accountsDbService.getAccounts()
-  const manager = new AccountsManager(accounts, authMachine)
-  const skinsManager = new SkinsManager(manager.accounts)
+    const accounts = AccountService.getAll()
+    const manager = new AccountsManager(accounts, authMachine)
+    const skinsManager = new SkinsManager(manager.accounts)
 
-  await manager.startQueue()
-  await skinsManager.parseSkins()
+    await manager.startQueue()
+    await skinsManager.parseSkins()
+  } catch (e) {
+    console.log('@error', e)
+  }
 })

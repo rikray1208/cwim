@@ -16,10 +16,10 @@ export interface Account {
   login: string
   password: string
   token: string | null
-  proxy: string | null
+  proxy: string
   status: string
-  cb: 0 | 1
-  limited: 0 | 1
+  cb: number
+  limited: number
   lvl: number
   balance: number
 }

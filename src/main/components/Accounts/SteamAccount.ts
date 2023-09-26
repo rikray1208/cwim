@@ -7,6 +7,7 @@ import { Account, SteamHandler } from '../../types/steam'
 import { EAuthTokenPlatformType, LoginSession } from 'steam-session'
 import { createProxy, getMaFileData } from '../../utils/helpers/accounts'
 import { AUTH_MACHINE_EVENT, AuthMachine } from '../AuthMachine'
+import { AccountService } from '../../db/Services/Account'
 
 export class SteamAccount {
   account: Account
@@ -98,12 +99,12 @@ export class SteamAccount {
   }
 
   private async logOn() {
-    if (this.account.token)
+    if (this.account.token) {
       return this.client.logOn({
         refreshToken: this.account.token,
         logonID: generate32BitInteger()
       })
-
+    }
     const options = this.account.proxy ? createProxy(this.account.proxy) : {}
     const session = new LoginSession(EAuthTokenPlatformType.SteamClient, options)
     const code = await this.generateAuthCode()
@@ -120,7 +121,7 @@ export class SteamAccount {
     })
 
     session.cancelLoginAttempt()
-    //accountsDbService.updateAccount<'token'>(this.account.id, { name: 'token', value: token }) | добавить update для orm
+    AccountService.update(this.account.id, { token: token })
 
     this.client.logOn({
       refreshToken: token,

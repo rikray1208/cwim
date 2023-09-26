@@ -1,3 +1,5 @@
+import { DBModel } from './Models/DbModel'
+
 export enum TableNames {
   ACCOUNTS = 'accounts',
   PROXY = 'proxy',
@@ -37,6 +39,9 @@ export type ModelScheme = {
 export type SimplifiedModel<T> = {
   [Key in keyof T]: T[Key] extends { type: Datatypes.TEXT } ? string : number
 }
+
+export type SimplifiedPKey<T extends typeof DBModel> =
+  T['primaryKey']['type'] extends Datatypes.TEXT ? string : number
 
 // export type SimplifiedModelScheme<T extends ModelScheme> = {
 //   [K in keyof T]: T[K]['type'] extends  Datatypes.TEXT ? string : number;

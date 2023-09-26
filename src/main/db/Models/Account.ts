@@ -5,6 +5,10 @@ const { NOT_NULL, PRIMARY_KEY } = DataAttributes
 
 export class MAccount extends DBModel {
   static name = TableNames.ACCOUNTS
+  static primaryKey = {
+    key: 'id',
+    type: Datatypes.INTEGER
+  } as const
 
   static scheme = {
     id: {

@@ -1,7 +1,8 @@
-import { TableNames } from '../types'
+import { Datatypes, TableNames } from '../types'
 
 export class DBModel {
   static name: TableNames
+  static primaryKey: { key: string; type: Datatypes }
   static scheme = {}
 
   static generateSqlRoutes() {

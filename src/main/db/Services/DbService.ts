@@ -1,5 +1,5 @@
 import { DbContext } from '../DbContext'
-import { DataAttributes, SimplifiedModel } from '../types'
+import { DataAttributes, SimplifiedModel, SimplifiedPKey } from '../types'
 import { DBModel } from '../Models/DbModel'
 
 const { AUTOINCREMENT, PRIMARY_KEY } = DataAttributes
@@ -61,7 +61,17 @@ export class DbService<M extends typeof DBModel> {
     })
   }
 
-  public update() {}
+  public update(PKey: SimplifiedPKey<M>, item: Partial<SimplifiedModel<M['scheme']>>) {
+    this.dbContext.withConnection(() => {
+      const update = this.dbContext.db!.prepare(`
+        UPDATE ${this.Model.name} SET ${Object.entries(item).map(
+          ([key, value]) => `${key} = '${value}'`
+        )}
+        WHERE ${this.Model.primaryKey.key} = '${PKey}'
+      `)
+      update.run(item)
+    })
+  }
 
   public delete() {}
 }

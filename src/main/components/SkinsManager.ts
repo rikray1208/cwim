@@ -2,12 +2,13 @@ import { SteamAccount } from './Accounts/SteamAccount'
 import { EconItem, SteamInventory } from '../types/steam'
 import { delay } from '../utils'
 import { saveEconItemsToDb } from '../utils/helpers/steam'
+import { accountsManager, AccountsManager } from './Accounts/AccountsManager'
 
 export class SkinsManager {
-  accounts: SteamAccount[]
+  accountsManager: AccountsManager
 
-  constructor(accounts: SteamAccount[]) {
-    this.accounts = accounts
+  constructor() {
+    this.accountsManager = accountsManager
   }
 
   private async getAccountInventoriesContext(account: SteamAccount) {
@@ -44,7 +45,7 @@ export class SkinsManager {
 
   public async parseSkins() {
     try {
-      for (const account of this.accounts) {
+      for (const account of this.accountsManager.accounts) {
         const inventoriesCtx = await this.getAccountInventoriesContext(account)
 
         for (const { appid, contextid } of inventoriesCtx) {
@@ -58,3 +59,5 @@ export class SkinsManager {
     }
   }
 }
+
+export const skinsManager = new SkinsManager()

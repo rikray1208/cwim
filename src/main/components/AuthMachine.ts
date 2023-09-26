@@ -21,3 +21,5 @@ export class AuthMachine extends EventEmitter {
     }, timeDelay)
   }
 }
+
+export const authMachine = new AuthMachine(1)

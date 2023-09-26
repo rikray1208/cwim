@@ -1,18 +1,25 @@
 import { SteamAccount } from './SteamAccount'
-import { Account } from '../../types/steam'
 import { delay } from '../../utils'
-import { AuthMachine } from '../AuthMachine'
+import { authMachine } from '../AuthMachine'
+import { AccountService } from '../../db/Services/Account'
 
 export class AccountsManager {
   accounts: SteamAccount[]
   queue: SteamAccount[]
   isQueueStarted: boolean
 
-  constructor(accounts: Account[], authMachine: AuthMachine) {
-    const steamAccounts = accounts.map((account) => new SteamAccount(account, authMachine))
-    this.accounts = [...steamAccounts]
-    this.queue = [...steamAccounts]
+  constructor() {
     this.isQueueStarted = false
+    this.accounts = []
+    this.queue = []
+  }
+
+  public init() {
+    const accounts = AccountService.getAll().map(
+      (account) => new SteamAccount(account, authMachine)
+    )
+    this.accounts = [...accounts]
+    this.queue = [...accounts]
   }
 
   public async addAccounts(account: SteamAccount) {
@@ -49,3 +56,5 @@ export class AccountsManager {
     this.isQueueStarted = false
   }
 }
+
+export const accountsManager = new AccountsManager()

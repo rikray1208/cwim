@@ -27,14 +27,6 @@ export class DbService<M extends typeof DBModel> {
       }
     }
 
-    console.log(
-      '@insert',
-      `
-          INSERT ${orIgnore ? 'OR IGNORE' : ''} INTO ${this.Model.name} (${modelKeys})
-          VALUES (${modelKeys.map((key) => `@${key}`)});
-    `
-    )
-
     return this.dbContext.db!.prepare(`
           INSERT ${orIgnore ? 'OR IGNORE' : ''} INTO ${this.Model.name} (${modelKeys})
           VALUES (${modelKeys.map((key) => `@${key}`)});
@@ -54,10 +46,7 @@ export class DbService<M extends typeof DBModel> {
 
       const blobInsert = this.dbContext!.db!.transaction(
         (items: SimplifiedModel<M['scheme']>[]) => {
-          for (const item of items) {
-            console.log('@item', item)
-            insert.run(item)
-          }
+          for (const item of items) insert.run(item)
         }
       )
 

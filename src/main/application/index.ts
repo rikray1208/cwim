@@ -1,8 +1,8 @@
 import { app as electronApp, App } from 'electron'
 import { WindowsManger } from './WindowsManger'
-import { accountsManager } from '../components/Accounts/AccountsManager'
 import { dbContext } from '../db/DbContext'
 import { authMachine } from '../components/AuthMachine'
+import { accountsManager } from '../components/Accounts/AccountsManager'
 import { skinsManager } from '../components/SkinsManager'
 
 class Application {
@@ -29,7 +29,7 @@ application.app.whenReady().then(async () => {
     accountsManager.init()
 
     await accountsManager.startQueue()
-    await skinsManager.parseSkins()
+    await skinsManager.updateAllPrices()
   } catch (e) {
     console.log('@error', e)
   }

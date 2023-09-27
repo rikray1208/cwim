@@ -5,6 +5,10 @@ const { NOT_NULL, PRIMARY_KEY } = DataAttributes
 
 export class MItemPrice extends DBModel {
   static name = TableNames.ITEM_PRICE
+  static primaryKey = {
+    key: 'hashName',
+    type: Datatypes.TEXT
+  } as const
 
   static scheme = {
     hashName: {

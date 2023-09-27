@@ -5,6 +5,10 @@ const { NOT_NULL, PRIMARY_KEY, AUTOINCREMENT } = DataAttributes
 
 export class MItem extends DBModel {
   static name = TableNames.ITEM
+  static primaryKey = {
+    key: 'id',
+    type: Datatypes.INTEGER
+  } as const
 
   static scheme = {
     id: {

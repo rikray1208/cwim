@@ -6,7 +6,7 @@ const { AUTOINCREMENT, PRIMARY_KEY } = DataAttributes
 
 export class DbService<M extends typeof DBModel> {
   Model: M
-  private dbContext: DbContext
+  protected dbContext: DbContext
 
   constructor(Model: M, dbContext: DbContext) {
     this.Model = Model
@@ -64,12 +64,10 @@ export class DbService<M extends typeof DBModel> {
   public update(PKey: SimplifiedPKey<M>, item: Partial<SimplifiedModel<M['scheme']>>) {
     this.dbContext.withConnection(() => {
       const update = this.dbContext.db!.prepare(`
-        UPDATE ${this.Model.name} SET ${Object.entries(item).map(
-          ([key, value]) => `${key} = '${value}'`
-        )}
-        WHERE ${this.Model.primaryKey.key} = '${PKey}'
+        UPDATE ${this.Model.name} SET ${Object.entries(item).map(([key]) => `${key} = ?`)}
+        WHERE ${this.Model.primaryKey.key} = ?
       `)
-      update.run(item)
+      update.run(Object.values(item), PKey)
     })
   }
 

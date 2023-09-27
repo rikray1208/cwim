@@ -12,8 +12,7 @@ export class DbContext {
   }
 
   private openDB() {
-    this.db = new Database(dbAppPath)
-    this.db.pragma('journal_mode = WAL')
+    this.db = new Database(dbAppPath, { verbose: (...data) => console.log(data) })
   }
   private closeDB() {
     this.db?.close()
@@ -29,6 +28,7 @@ export class DbContext {
   }
   public init() {
     const request = () => {
+      this.db!.pragma('journal_mode = WAL')
       for (const Model of this.Models) this.crateTable(Model)
     }
 

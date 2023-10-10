@@ -1,9 +1,13 @@
 import ReactDOM from 'react-dom/client'
-import './assets/index.css'
+import './assets/global.scss'
 import App from './App'
+
+import { HashRouter } from 'react-router-dom'
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <>
-    <App />
+    <HashRouter>
+      <App />
+    </HashRouter>
   </>
 )

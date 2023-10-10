@@ -1,0 +1,39 @@
+.container {
+  width: 100vw;
+  margin: 0;
+  -webkit-app-region: drag;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background-image: var(--title-bar-gradient);
+  padding: 10px var(--app-padding);
+}
+
+.title {
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: var(--accent);
+}
+
+.btns {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+
+.minimizeBtn,
+.closeBtn {
+  -webkit-app-region: no-drag;
+  background: transparent;
+  border: none;
+  outline: none;
+
+  transition: all 150ms var(--transition-all);
+
+  &:active {
+    transform: translateY(5%);
+  }
+}

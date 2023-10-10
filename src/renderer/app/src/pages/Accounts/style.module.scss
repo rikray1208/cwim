@@ -1,0 +1,27 @@
+.container {
+  display: flex;
+  margin: var(--app-padding);
+
+  background-color: #242424;
+  border-radius: 8px;
+  padding: 20px;
+
+  height: 100%;
+
+  overflow-y: auto;
+}
+
+.container::-webkit-scrollbar {
+  width: 5px;
+  background: transparent;
+}
+.container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.container::-webkit-scrollbar-thumb {
+  background: #353535;
+  border-radius: 8px;
+}
+.container::-webkit-scrollbar-thumb:hover {
+  background: #4b4b4b;
+}

@@ -1,6 +1,6 @@
 export const mainWindowCfg = {
   width: 1320,
-  height: 680,
+  height: 700,
   resizable: false,
   show: false,
   autoHideMenuBar: true,

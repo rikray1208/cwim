@@ -3,11 +3,12 @@ import SteamCommunity from 'steamcommunity'
 import SteamUser from 'steam-user'
 import SteamTotp from 'steam-totp'
 import { generate32BitInteger, steamInitialization } from '../../utils/helpers/steam'
-import { Account, SteamHandler } from '../../types/steam'
+import { SteamHandler } from '../../types/steam'
 import { EAuthTokenPlatformType, LoginSession } from 'steam-session'
 import { createProxy, getMaFileData } from '../../utils/helpers/accounts'
 import { AUTH_MACHINE_EVENT, AuthMachine } from '../AuthMachine'
 import { AccountService } from '../../db/Services/Account'
+import { Account } from '../../types/common'
 
 export class SteamAccount {
   account: Account
@@ -73,6 +74,8 @@ export class SteamAccount {
     console.log('@hasWallet', hasWallet)
     console.log('@currency', currency)
     console.log('@balance', balance)
+
+    AccountService.update(this.account.id, { balance: balance })
   }
 
   private async accountLimitationsHandler(limited: boolean, _: boolean, locked: boolean) {
@@ -91,6 +94,19 @@ export class SteamAccount {
   private async webSessionHandler(_: string, cookies: string[]) {
     await this.manager.setCookies(cookies)
     this.community.setCookies(cookies)
+
+    // console.log('@halo halo')
+    //
+    // const user = await new Promise((resolve, reject) => {
+    //   // @ts-ignore
+    //   this.community.getSteamUser(this.client.steamID,(err, user) => {
+    //     if (err) reject(err)
+    //     resolve(user)
+    //   })
+    // })
+    // // @ts-ignore
+    // const avatar = user.getAvatarURL('medium')
+    // console.log('@user', avatar)
   }
 
   private async generateAuthCode() {

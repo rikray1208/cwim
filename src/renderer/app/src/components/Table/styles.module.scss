@@ -1,0 +1,98 @@
+.container {
+  width: 100%;
+  height: fit-content;
+  overflow: hidden;
+
+  overflow-x: auto;
+}
+
+.table {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.thead {
+  & tr th {
+    font-size: 0.6rem;
+    font-weight: 800;
+    color: var(--text-color);
+    padding: 0.6em 0;
+    text-transform: uppercase;
+  }
+
+  & tr th:not(:first-child) {
+    text-align: start;
+  }
+}
+
+.tbody {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #f7f4fb;
+
+  & tr:hover {
+    background-color: var(--highlight);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 5%);
+    cursor: pointer;
+  }
+
+  & tr td {
+    padding: 1.09em 0;
+    width: fit-content;
+
+    & > span:first-child {
+      margin-right: 5px;
+    }
+  }
+
+  & tr td:first-child {
+    text-align: center;
+  }
+
+  & td:last-child {
+    width: 100px;
+    padding-right: 0.8em;
+  }
+}
+
+.actionsContainer {
+  display: flex;
+  justify-content: space-between;
+}
+
+td:first-child,
+th:first-child {
+  border-radius: 10px 0 0 10px;
+}
+
+td:last-child,
+th:last-child {
+  border-radius: 0 10px 10px 0;
+}
+
+.tableIcon {
+  border-radius: 50%;
+  border: 1px solid var(--highlight);
+}
+
+.tableItemFlex {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.actionBtn {
+  background-color: transparent;
+  border: none;
+  outline: none;
+
+  cursor: pointer;
+
+  transition: all 50ms var(--transition-all);
+
+  &:active {
+    transform: translateY(5%);
+  }
+}

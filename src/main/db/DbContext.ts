@@ -12,7 +12,8 @@ export class DbContext {
   }
 
   private openDB() {
-    this.db = new Database(dbAppPath, { verbose: (...data) => console.log(data) })
+    //{ verbose: (...data) => console.log(data) }
+    this.db = new Database(dbAppPath)
   }
   private closeDB() {
     this.db?.close()

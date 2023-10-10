@@ -11,19 +11,6 @@ export interface SteamHandler {
   handler: (...params: any[]) => void
 }
 
-export interface Account {
-  id: number
-  login: string
-  password: string
-  token: string | null
-  proxy: string
-  status: string
-  cb: number
-  limited: number
-  lvl: number
-  balance: number
-}
-
 export type SteamInventory = { appid: number; contextid: number }
 
 export interface tag {

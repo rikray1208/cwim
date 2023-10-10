@@ -28,7 +28,6 @@ export class WindowsManger {
     })
 
     if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
-      console.log(`${process.env['ELECTRON_RENDERER_URL']}/app/index.html`)
       await this.mainWindow.loadURL(`${process.env['ELECTRON_RENDERER_URL']}/app/index.html`)
     } else {
       await this.mainWindow.loadFile(join(__dirname, '../renderer/app/index.html'))

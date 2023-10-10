@@ -19,10 +19,6 @@
     "build:linux": "electron-vite build && electron-builder --linux --config"
   },
   "dependencies": {
-    "@electron-toolkit/preload": "^2.0.0",
-    "@electron-toolkit/utils": "^2.0.0",
-    "@types/steam-user": "^4.26.4",
-    "@types/steamcommunity": "^3.43.2",
     "axios": "^1.5.0",
     "better-sqlite3": "^8.6.0",
     "cheerio": "^1.0.0-rc.12",
@@ -30,25 +26,33 @@
     "steam-totp": "^2.1.2",
     "steam-tradeoffer-manager": "^2.10.6",
     "steam-user": "^4.29.1",
-    "steamcommunity": "^3.46.1"
+    "steamcommunity": "^3.46.1",
+    "zustand": "^4.4.3"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^1.0.1",
     "@electron-toolkit/eslint-config-ts": "^1.0.0",
+    "@electron-toolkit/preload": "^2.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@electron-toolkit/utils": "^2.0.0",
     "@types/better-sqlite3": "^7.6.4",
     "@types/node": "^18.17.5",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
+    "@types/steam-user": "^4.26.4",
+    "@types/steamcommunity": "^3.43.2",
     "@vitejs/plugin-react": "^4.0.4",
     "electron": "^25.6.0",
     "electron-builder": "^24.6.3",
     "electron-vite": "^1.0.27",
     "eslint": "^8.47.0",
     "eslint-plugin-react": "^7.33.2",
+    "lucide-react": "^0.279.0",
     "prettier": "^3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.16.0",
+    "sass": "^1.68.0",
     "typescript": "^5.1.6",
     "vite": "^4.4.9"
   }

@@ -3,7 +3,8 @@ import { WindowsManger } from './WindowsManger'
 import { dbContext } from '../db/DbContext'
 import { authMachine } from '../components/AuthMachine'
 import { accountsManager } from '../components/Accounts/AccountsManager'
-import { skinsManager } from '../components/SkinsManager'
+import { optimizer } from '@electron-toolkit/utils'
+import { startIpcListeners } from './ipcMain/listeners'
 
 class Application {
   app: App
@@ -11,26 +12,35 @@ class Application {
   constructor() {
     this.app = electronApp
     this.windowsManager = new WindowsManger()
+
+    this.app.on('window-all-closed', () => {
+      this.app.quit()
+      process.exit(1)
+    })
+
+    this.app.on('browser-window-created', (_, window) => {
+      optimizer.watchWindowShortcuts(window)
+    })
   }
-}
-export const application = new Application()
 
-application.app.on('window-all-closed', () => {
-  electronApp.quit()
-  process.exit(1)
-})
+  start() {
+    this.app.whenReady().then(async () => {
+      try {
+        await this.windowsManager.createMainWindow()
+        startIpcListeners()
+        await this.initStartData()
+      } catch (error) {
+        console.log(error)
+      }
+    })
+  }
 
-application.app.whenReady().then(async () => {
-  try {
-    await application.windowsManager.createMainWindow()
-
+  async initStartData() {
     dbContext.init()
     authMachine.start()
     accountsManager.init()
 
     await accountsManager.startQueue()
-    await skinsManager.updateAllPrices()
-  } catch (e) {
-    console.log('@error', e)
   }
-})
+}
+export const application = new Application()

@@ -1,27 +1,40 @@
-# cwim
+# 🗻 CloudWave Inventory Manager
 
-An Electron application with React and TypeScript
+**Tool for Steam with a wide range of features**
 
-## Recommended IDE Setup
+Support for an **unlimited** number of accounts. Multifunctional **skin table**, convenient **trade manager**,
+support for **CS2 containers**, statistics, and much more.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
 
-## Project Setup
+#### [========🍺---------------------------------------] 20%
 
-### Install
+## Tech Stack
+
+**Client:**
+- [React JS](https://react.dev)
+- [Zustand](https://github.com/pmndrs/zustand)
+- react-window
+
+**Server:**
+- [Node JS](https://nodejs.org/en)
+- [Electron JS](https://www.electronjs.org/)
+- [Vite](https://vitejs.dev/)
+- steamcommunity
+- steam-tradeoffer-manager
+- steam-user
+
+## Installation
 
 ```bash
+# Clone the repo
+$ git clone https://github.com/rikray1208/cwim.git
+
+# Install NPM packages
 $ npm install
+
 ```
 
-### Development
-
-```bash
-$ npm run dev
-```
-
-### Build
-
+## Build
 ```bash
 # For windows
 $ npm run build:win
@@ -32,3 +45,7 @@ $ npm run build:mac
 # For Linux
 $ npm run build:linux
 ```
+
+### 📌 Support another one of my projects
+
+[**Steam looter**](https://www.cloudwave-looter.store/)
